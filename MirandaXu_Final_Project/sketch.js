@@ -1,28 +1,23 @@
-var A4;
-var Ab4;
-var B4;
-var Bb4;
-var C4;
-var C5;
-var D4;
-var D5;
-var Db4;
-var Db5;
-var E4;
-var E5;
-var Eb4;
-var Eb5;
-var F4;
-var F5;
-var G4;
-var Gb4;
-var Gb5;
+var A4, Ab4, B4, Bb4, C4, C5, D4, D5, Db4, Db5, E4, E5, Eb4, Eb5, F4, F5, G4, Gb4, Gb5; // vars for sound files
 var x = 150;
-var y = 400;
-var c;
-var s;
-var paw;
+var y = 400; // initial position of the grey mouse
+var c, c2; 
+var s; // colors of piano keys
+var paw; // image file for cat paw
 var points = [];
+var greymouse, whitemouse, brownmouse; // image files
+var mode = 1; // set defult mode
+var jumper; // jumper that controls the movement of brown mouse
+var pic; 
+var vx = 10;
+var vy = 10; // initial position of the white mouse
+var font1;
+var fontSize = 40;
+var rateOfChange = 2; // rate of change of font size
+var textx = 100;
+var texty = 260; // initial position of text for mode 3
+var rateOfChange2 = 10;
+
 
 function preload() { // preload sound and image files
   A4 = loadSound('data/Piano.mf.A4.mp3');
@@ -43,23 +38,71 @@ function preload() { // preload sound and image files
   F5 = loadSound('data/Piano.mf.F5.mp3');
   G4 = loadSound('data/Piano.mf.G4.mp3');
   Gb4 = loadSound('data/Piano.mf.Gb4.mp3');
-  Gb5 = loadSound('data/Piano.mf.Gb5.mp3');
+  Gb5 = loadSound('data/Piano.mf.Gb5.mp3'); // piano notes sound files
   paw = loadImage('data/catpaw.png');
+  greymouse = loadImage('data/mouse1.png');
+  whitemouse = loadImage('data/mouse2.png');
+  brownmouse = loadImage('data/mouse3.png'); // image files
+  font1 = loadFont('data/font1.ttf'); // text fond file
+
 }
 
 
 function setup() {
-  createCanvas(800, 300);
-  frameRate(50);
+  createCanvas(900, 300);
+  frameRate(40);
+
+  jumper = new Jumper();
+
 } // end of setup
 
 function draw() {
   background(255);
   strokeWeight(2);
-  var blackkey = new Keys();
-  var whitekey = new Keys2();
 
-  if (frameCount % 90 < 30) { // color of piano tiles slightly change periodically 
+  imageMode(CORNER);
+  image(greymouse, 800, 5, 80, 80);
+  image(whitemouse, 805, 100, 80, 80);
+  image(brownmouse, 810, 200, 85, 75); // 3 icons on the right, to let users choose the mode
+
+
+  if ((mouseX > 800) && (mouseX < width) && (mouseY > 0) && (mouseY < 100)) { // user selecting the grey mouse (mode 1)
+    fill(255);
+    noStroke();
+    rect(800, 0, 100, 100);
+    image(greymouse, 790, 0, 100, 100);
+
+    if (mouseIsPressed) {
+      mode = 1;
+    }
+  }
+
+  if ((mouseX > 800) && (mouseX < width) && (mouseY > 100) && (mouseY < 200)) { // user selectng the white mouse (mode 2)
+    fill(255);
+    noStroke();
+    rect(800, 100, 100, 100);
+    image(whitemouse, 790, 100, 100, 100);
+
+    if (mouseIsPressed) {
+      mode = 2;
+    }
+  }
+
+  if ((mouseX > 800) && (mouseX < width) && (mouseY > 200) && (mouseY < 300)) { // user selectng the brown mouse (mode 3)
+    fill(255);
+    noStroke();
+    rect(800, 200, 100, 100);
+    image(brownmouse, 800, 200, 115, 95);
+
+    if (mouseIsPressed) {
+      mode = 3;
+    }
+  }
+
+
+  // color of black keys slightly change periodically
+
+  if (frameCount % 90 < 30) {
     c = color(12, 43, 115);
     s = color(192, 232, 213);
   }
@@ -72,19 +115,42 @@ function draw() {
     s = color(255, 254, 211);
   }
 
-  for (var i = 0; i < 10; i++) { // draw white piano tiles
-    stroke(0);
-    fill(224, 255, 226);
-    rect(80 * i, 0, 80, height);
-  } // end of "for i"
 
-  for (var j = 0; j < 9; j++) { // draw black piano tiles
+  //for different modes, the white keys have different colors
+
+  if (mode == 1) {
+    c2 = color(186, 138, 232);
+    pic = greymouse;
+  }
+
+  if (mode == 2) {
+    c2 = color(255, 97, 90);
+    pic = whitemouse;
+  }
+
+  if (mode == 3) {
+    c2 = color(255, 239, 194);
+    pic = brownmouse;
+  }
+
+
+  //draw white piano tiles
+  
+  for (var i = 0; i < 10; i++) { 
+    stroke(0);
+    fill(c2);
+    rect(80 * i, 0, 80, height);
+  } 
+  
+  // draw black piano tiles
+
+  for (var j = 0; j < 9; j++) { 
     fill(c);
     stroke(s);
     rect(60 + 80 * j, 0, 40, (2 / 3) * height);
-  } // end of "for j"
+  } 
 
-
+  //using an array to create a "tail" effect for the cat paw
   var point = {
     x: mouseX,
     y: mouseY
@@ -101,9 +167,10 @@ function draw() {
 
 
   if (mouseIsPressed) { // when the cat touches and scratches the screen
-    // a cat paw is shown, with shadows behind it
+    // a cat paw is shown, with a "tail" behind it
     imageMode(CENTER);
     image(paw, mouseX, mouseY, 40, 40);
+
     for (var k = 0; k < points.length; k++) {
       noStroke();
       fill(255, 0, 0, 255 - k * 5);
@@ -113,155 +180,97 @@ function draw() {
     strokeWeight(4);
     stroke(random(120, 255), random(120, 255), random(120, 255));
 
-    if (((mouseX < 60) && (mouseY < 200)) || ((mouseX < 80) && (mouseY > 200) && (mouseY > 200) && (mouseY < 300))) {
-      line(0, 0, 60, 0);
-      line(0, 0, 0, 300);
-      line(0, 300, 80, 300);
-      line(60, 0, 60, 200);
-      line(60, 200, 80, 200);
-      line(80, 200, 80, 300);
-      C4.play();
-      //play 1st note
-
-    } else if ((mouseX > 60) && (mouseX < 100) && (mouseY < 200)) {
-      blackkey.display(0);
-      /*
-      line(60, 0, 100, 0);
-      line(60, 200, 100, 200);
-      line(60, 0, 60, 200);
-      line(100, 0, 100, 200);
-      */
-      Db4.play();
-      // play 2nd note
-
-    } else if (((mouseX > 100) && (mouseX < 140) && (mouseY < 200)) || ((mouseX > 80) && (mouseX < 160) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(0);
-      /*
-      line(100, 0, 140, 0);
-      line(80, 200, 100, 200);
-      line(140, 200, 160, 200);
-      line(80, 300, 160, 300);
-      line(100, 0, 100, 200);
-      line(140, 0, 140, 200);
-      line(80, 200, 80, 300);
-      line(160, 200, 160, 300);
-      */
-      D4.play();
-      // play 3rd note
-
-    } else if ((mouseX > 140) && (mouseX < 180) && (mouseY < 200)) {
-      blackkey.display(1);
-      /*
-      line(140, 0, 180, 0);
-      line(140, 200, 180, 200);
-      line(140, 0, 140, 200);
-      line(180, 0, 180, 200);
-      */
-      Eb4.play();
-      // play 4th note
-
-    } else if (((mouseX > 180) && (mouseX < 220) && (mouseY < 200)) || ((mouseX > 160) && (mouseX < 240) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(1);
-      E4.play();
-      // play 5th note
-
-    } else if ((mouseX > 220) && (mouseX < 260) && (mouseY < 200)) {
-      blackkey.display(2);
-      F4.play();
-      // play 6th note
-
-    } else if (((mouseX > 260) && (mouseX < 300) && (mouseY < 200)) || ((mouseX > 240) && (mouseX < 320) && (mouseY > 200) & (mouseY < 300))) {
-      whitekey.display(2);
-      Gb4.play();
-      // play 7th note
-
-    } else if ((mouseX > 300) && (mouseX < 340) && (mouseY < 200)) {
-      blackkey.display(3);
-      G4.play();
-      // play 8th note
-
-    } else if (((mouseX > 340) && (mouseX < 380) && (mouseY < 200)) || ((mouseX > 320) && (mouseX < 400) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(3);
-      Ab4.play();
-      // play 9th note
-
-    } else if ((mouseX > 380) && (mouseX < 420) && (mouseY < 200)) {
-      blackkey.display(4);
-      A4.play();
-      // play 10th note
-
-    } else if (((mouseX > 420) && (mouseX < 460) && (mouseY < 200)) || ((mouseX > 400) && (mouseX < 480) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(4);
-      Bb4.play();
-      //play 11th note
-
-    } else if ((mouseX > 460) && (mouseX < 500) && (mouseY < 200)) {
-      blackkey.display(5);
-      B4.play();
-      // play 12th note
-
-    } else if (((mouseX > 500) && (mouseX < 540) && (mouseY < 200)) || ((mouseX > 480) && (mouseX < 560) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(5);
-      C5.play();
-      // play 13th note
-
-    } else if ((mouseX > 540) && (mouseX < 580) && (mouseY < 200)) {
-      blackkey.display(6);
-      Db5.play();
-      // play 14th note
-
-    } else if (((mouseX > 580) && (mouseX < 620) && (mouseY < 200)) || ((mouseX > 560) && (mouseX < 640) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(6);
-      D5.play();
-      // play 15th note
-
-    } else if ((mouseX > 620) && (mouseX < 660) && (mouseY < 200)) {
-      blackkey.display(7);
-      Eb5.play();
-      // play 16th note
-
-    } else if (((mouseX > 660) && (mouseX < 700) && (mouseY < 200)) || ((mouseX > 640) && (mouseX < 720) && (mouseY > 200) && (mouseY < 300))) {
-      whitekey.display(7);
-      E5.play();
-      // play 17th note
-
-    } else if ((mouseX > 700) && (mouseX < 740) && (mouseY < 200)) {
-      blackkey.display(8);
-      F5.play();
-      // play 18th note
-
-    } else if (((mouseX > 740) && (mouseX < width) && (mouseY < 200)) || ((mouseX > 720) && (mouseX < width) && (mouseY > 200) && (mouseY < 300))){
-      line(740, 0, 800, 0);
-      line(720, 300, 800, 300);
-      line(720, 200, 740, 200);
-      line(720, 200, 720, 300);
-      line(740, 0, 740, 200);
-      line(800, 0, 800, 300);
-      Gb5.play();
-      // play 19th note
-    } 
+    var keyboard = new Keyboard();
+    keyboard.display();
 
   } // end of mouseIsPressed
 
+  // mode 1: a grey mouse moves randomly and disappears periodically
+  if (mode == 1) { 
+    if (frameCount % 30 < 20) {
+      strokeWeight(1.5);
+      fill(255);
+      textFont(font1, fontSize);
+      text('CATCH ME!', 520, 265);
+    }
 
-  fill(255, 0, 0); // generates a lightspot that moves randomly
-  // so it invites the cat to interact with it
-  noStroke();
-  ellipse(x, y, 20, 20);
-  x += random(-25, 25);
-  y += random(-25, 25);
+    if (frameCount % 80 < 45) {
+      // moves the mouse randomly -> invites the cat to interact with it
+      imageMode(CENTER);
+      image(pic, x, y, 50, 50);
+      x += random(-20, 20);
+      y += random(-20, 20);
 
-  if (x > width) { // limiter that brings back the lightspot when it goes out of the edges
-    x = 750;
-  }
-  if (x < 0) {
-    x = 50;
-  }
-  if (y > height) {
-    y = 280;
-  }
-  if (y < 0) {
-    y = 20;
-  }
+      if (x > width) { // limiter that brings back the lightspot when it goes out of the edges
+        x = 750;
+      }
+      if (x < 0) {
+        x = 50;
+      }
+      if (y > height) {
+        y = 280;
+      }
+      if (y < 0) {
+        y = 20;
+      }
+
+    } // end of framecount
+
+  } // end of mode 1
+
+  // mode 2: a white mouse that moves with a constant speed and bounces when touching the edges
+  if (mode == 2) {
+    //var vx = 5;
+    //var vy = 5;
+
+    strokeWeight(0.5);
+    fill(255, 213, 164);
+    textFont(font1, fontSize);
+    text('CATCH ME!', 50, 275);
+
+    fontSize += rateOfChange;
+
+    if ((fontSize > 60) || (fontSize < 30)) {
+      rateOfChange = rateOfChange * (-1)
+    }
+
+
+    imageMode(CENTER);
+    image(pic, x, y, 50, 50);
+    x += vx;
+    y += vy; // moves the mouse with a constant speed vx and vy
+
+    if ((x > 775) || (x < 20)) { // changing direction so the mouse bounces from the edges
+      vx = vx * (-1);
+    }
+    if ((y > 280) || (y < 20)) {
+      vy = vy * (-1)
+    }
+
+  } // end of mode 2
+
+
+  // mode 3: a brown mouse that jumps around the screen
+  if (mode == 3) { 
+    var forcey = createVector(0, 0.8);
+    var forcex = createVector(0.05, 0);
+    jumper.applyForce(forcey);
+    jumper.applyForce(forcex);
+    jumper.update();
+    jumper.display(pic);
+    jumper.limiter();
+  
+    strokeWeight(0.5);
+    fill(173, 100, 44);
+    textFont(font1, 45);
+    text('CATCH ME!', textx, texty);
+    
+    textx += rateOfChange2;
+
+    if ((textx > 520) || (textx < 100)) {
+      rateOfChange2 = rateOfChange2 * (-1)
+    }
+    
+  } // end of mode 3
 
 } // end of draw
